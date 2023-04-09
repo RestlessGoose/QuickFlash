@@ -3,6 +3,14 @@
 
 ### Only tested under MacOS!
 
+## Screenshot
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/RestlessGoose/QuickFlash/blob/main/Extra/Screenshots/dark.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/RestlessGoose/QuickFlash/blob/main/Extra/Screenshots/light.png?raw=true">
+  <img alt="Read & Save option">
+</picture>
+
+
 Prerequisites
 -------------
 - CH341A programmer
