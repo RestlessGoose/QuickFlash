@@ -1,7 +1,7 @@
 # QuickFlash
 ### Simple Python tool to easily utilize flashrom via a graphical interface. 
 
-### Only tested under MacOS!
+### Disclaimer: I am not responsible for bricked devices, data loss, dead chips, thermonuclear war, or the current economic crisis caused by you using this piece of software. Please use with caution while keeping in mind that this is *alpha stage* software and is not guaranteed to have 100% stability. And also as of right now, it's been tested only on MacOS.
 
 ## Screenshot
 <picture>
@@ -13,6 +13,7 @@
 
 Prerequisites
 -------------
+- Preferably a Mac or a hackintosh
 - CH341A programmer
 - CH34xVCPDriver
 - flashrom
@@ -20,16 +21,16 @@ Prerequisites
 
 Preparation
 -----------
-- Download and install [CH34xVCPDriver](https://github.com/WCHSoftGroup/ch34xser_macos)
-- Open terminal and paste in `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, to install [Homebrew](https://brew.sh/)
-- Install flashrom: enter `brew install flashrom` into terminal after homebrew is installed.
+1. Download and install [CH34xVCPDriver](https://github.com/WCHSoftGroup/ch34xser_macos) by following their instructions.
+2. Open terminal and paste in `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, to install [Homebrew](https://brew.sh/). Skip this step if you already have it.
+3. Install flashrom: enter `brew install flashrom` into terminal after homebrew is installed.
 
 Usage
 -----
-- Plug in CH341A programmer
-- Run QuickFlash
-- Hit "Initialize" and select chip model from dropdown menu in popup.
-- Use "Autoflash", "Read & Save" or "Erase"
+1. Plug in CH341A programmer
+2. Run QuickFlash
+3. Hit "Initialize" and select chip model from dropdown menu in popup.
+4. Use "Autoflash", "Read & Save" or "Erase & Blank check". You do not have to hit Reset every time you want to use them.
 
 
 Credits
