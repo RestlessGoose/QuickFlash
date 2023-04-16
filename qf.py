@@ -56,6 +56,7 @@ def flashrom_exists():
         if "flashrom v" in l:
             aversion = l.split("\n")[-1]
             break
+    terminalappend(arg1=("DISCLAIMER: I am not responsible for bricked devices, data loss, dead chips, thermonuclear war, or the current economic crisis caused by you using this piece of software. Please use with caution while keeping in mind that this is alpha stage software and is not guaranteed to have 100% stability. And also as of right now, it's been tested only on MacOS.\n\n"))
     terminalappend(arg1=("  [QUICKFLASH v" + version + "] Flashrom detected successfully.\n    " + aversion + "\n"))
 
 def check_flashrom():
@@ -108,7 +109,7 @@ def terminalappend(arg1):
     terminal_output.insert('end', arg1)
     terminal_output.see('end')
     terminal_output.config(state="disabled")
-
+    
 def initok():
     popupWindow.destroy()
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Initialization complete!\n    Selected chip model: " + selected_option.get()))
