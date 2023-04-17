@@ -19,11 +19,16 @@ Prerequisites
 - flashrom
 - Python 3
 
-Preparation
+Preparation (MacOS)
 -----------
 1. Download and install [CH34xVCPDriver](https://github.com/WCHSoftGroup/ch34xser_macos) by following their instructions.
 2. Open terminal and paste in `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, to install [Homebrew](https://brew.sh/). Skip this step if you already have it.
 3. Install flashrom: enter `brew install flashrom` into terminal after homebrew is installed.
+
+Preparation (Windows)
+-----------
+- Currently work in progress
+- Can be set up on Windows with some research but may have catastrophic bugs that i have not discovered yet
 
 Usage
 -----
