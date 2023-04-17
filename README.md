@@ -1,7 +1,7 @@
 # QuickFlash
 ### Simple Python tool to easily utilize flashrom via a graphical interface. 
 
-### Disclaimer: I am not responsible for bricked devices, data loss, dead chips, thermonuclear war, or the current economic crisis caused by you using this piece of software. Please use with caution while keeping in mind that this is *alpha stage* software and is not guaranteed to have 100% stability. And also as of right now, it's been tested only on MacOS.
+### Disclaimer: I am not responsible for bricked devices, data loss, dead chips, thermonuclear war, or the current economic crisis caused by you using this piece of software. Please use with caution while keeping in mind that this is *alpha stage* software and is not guaranteed to have 100% stability. And also as of right now, it's been tested only on MacOS. (Windows may work but is untested so use at your own risk!)
 
 ## Screenshot
 <picture>
