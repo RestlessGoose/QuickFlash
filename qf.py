@@ -5,7 +5,7 @@ import sys
 import time
 from tkinter import filedialog
 
-version = "0.2.3"
+version = "0.2.4"
 identifier = "Alpha"
 
 def quit():
