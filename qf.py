@@ -3,6 +3,8 @@ import tkinter.ttk as ttk
 import subprocess
 import sys
 import time
+from tkinter import ttk
+from tkinter import *
 from tkinter import filedialog
 
 version = "0.2.5"
@@ -283,6 +285,7 @@ if sys.platform == 'win32':
 
     exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
     exit_button.pack(side="left", padx=10, pady=(15))
+
 elif sys.platform == 'darwin':
     top_frame = tk.Frame(root, height=100)
     top_frame.pack(fill="x")
@@ -347,7 +350,12 @@ else:
 terminal_header = tk.Label(bottom_frame, text="↓ Terminal output ↓")
 terminal_header.pack(anchor='center', pady=2)
 global terminal_output
-terminal_output = tk.Text(bottom_frame, font=("Courier New", 14))
+if sys.platform == 'win32':
+    terminal_output = tk.Text(bottom_frame, font=("Consolas", 10))
+elif sys.platform == 'darwin':
+    terminal_output = tk.Text(bottom_frame, font=("Courier New", 12))
+else:
+    terminal_output = tk.Text(bottom_frame, font=("Courier New", 12))
 terminal_output.pack(fill="both", expand=True)
 terminal_output.config(state="disabled")
 progress_bar = ttk.Progressbar(root, mode='indeterminate')
