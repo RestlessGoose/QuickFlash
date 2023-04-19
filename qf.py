@@ -3,9 +3,11 @@ import tkinter.ttk as ttk
 import subprocess
 import sys
 import time
+from tkinter import ttk
+from tkinter import *
 from tkinter import filedialog
 
-version = "0.2.3"
+version = "0.2.5"
 identifier = "Alpha"
 
 def quit():
@@ -252,40 +254,108 @@ y = round((screen_height/2) - (height/2))
 root.geometry(str(width) + "x" + str(height) + "+" + str(x) + "+" + str(y))
 root.resizable(False, False)
 
-top_frame = tk.Frame(root, height=100)
-top_frame.pack(fill="x")
+if sys.platform == 'win32':
+    top_frame = tk.Frame(root, height=100)
+    top_frame.pack(fill="x")
 
-button_frame = tk.Frame(root, height=1)
-button_frame.pack(side='bottom', anchor='center')
+    button_frame = tk.Frame(root, height=1)
+    button_frame.pack(side='bottom', anchor='center')
 
-bottom_frame = tk.Frame(root, height=410)
-bottom_frame.pack(fill="both", expand=True)
+    bottom_frame = tk.Frame(root, height=410)
+    bottom_frame.pack(fill="both", expand=True)
 
-header = tk.Label(top_frame, text="QuickFlash " + identifier + " v" + version + " - CH341A_SPI", font=("Arial", 16))
-header.pack(fill='x', anchor="center")
 
-init_button = tk.Button(button_frame, text="Initialize", command=lambda: init())
-init_button.pack(side="left", padx=0, pady=(0, 8))
+    header = tk.Label(top_frame, text="QuickFlash " + identifier + " v" + version + " - CH341A_SPI", font=("Arial", 16))
+    header.pack(fill='x', anchor="center")
 
-autoflash_button = tk.Button(button_frame, text="Autoflash", command=lambda: autoflash(), state="disabled")
-autoflash_button.pack(side="left", padx=0, pady=(0, 8))
+    init_button = tk.Button(button_frame, text="Initialize", command=lambda: init())
+    init_button.pack(side="left", padx=10, pady=(15))
 
-read_save_button = tk.Button(button_frame, text="Read & Save", command=lambda: readsave(), state="disabled")
-read_save_button.pack(side="left", padx=0, pady=(0, 8))
+    autoflash_button = tk.Button(button_frame, text="Autoflash", command=lambda: autoflash(), state="disabled")
+    autoflash_button.pack(side="left", padx=10, pady=(15))
 
-erase_button = tk.Button(button_frame, text="Erase & Blank check", command=lambda: erase(), state="disabled")
-erase_button.pack(side="left", padx=0, pady=(0, 8))
+    read_save_button = tk.Button(button_frame, text="Read & Save", command=lambda: readsave(), state="disabled")
+    read_save_button.pack(side="left", padx=10, pady=(15))
 
-clear_button = tk.Button(button_frame, text="Reset", command=lambda: terminalwipe(), state="disabled")
-clear_button.pack(side="left", padx=0, pady=(0, 8))
+    erase_button = tk.Button(button_frame, text="Erase & Blank check", command=lambda: erase(), state="disabled")
+    erase_button.pack(side="left", padx=10, pady=(15))
 
-exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
-exit_button.pack(side="left", padx=0, pady=(0, 8))
+    clear_button = tk.Button(button_frame, text="Reset", command=lambda: terminalwipe(), state="disabled")
+    clear_button.pack(side="left", padx=10, pady=(15))
+
+    exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
+    exit_button.pack(side="left", padx=10, pady=(15))
+
+elif sys.platform == 'darwin':
+    top_frame = tk.Frame(root, height=100)
+    top_frame.pack(fill="x")
+
+    button_frame = tk.Frame(root, height=1)
+    button_frame.pack(side='bottom', anchor='center')
+
+    bottom_frame = tk.Frame(root, height=410)
+    bottom_frame.pack(fill="both", expand=True)
+
+    header = tk.Label(top_frame, text="QuickFlash " + identifier + " v" + version + " - CH341A_SPI", font=("Arial", 16))
+    header.pack(fill='x', anchor="center")
+
+    init_button = tk.Button(button_frame, text="Initialize", command=lambda: init())
+    init_button.pack(side="left", padx=0, pady=(0, 8))
+
+    autoflash_button = tk.Button(button_frame, text="Autoflash", command=lambda: autoflash(), state="disabled")
+    autoflash_button.pack(side="left", padx=0, pady=(0, 8))
+
+    read_save_button = tk.Button(button_frame, text="Read & Save", command=lambda: readsave(), state="disabled")
+    read_save_button.pack(side="left", padx=0, pady=(0, 8))
+
+    erase_button = tk.Button(button_frame, text="Erase & Blank check", command=lambda: erase(), state="disabled")
+    erase_button.pack(side="left", padx=0, pady=(0, 8))
+
+    clear_button = tk.Button(button_frame, text="Reset", command=lambda: terminalwipe(), state="disabled")
+    clear_button.pack(side="left", padx=0, pady=(0, 8))
+
+    exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
+    exit_button.pack(side="left", padx=0, pady=(0, 8))
+else:
+    top_frame = tk.Frame(root, height=100)
+    top_frame.pack(fill="x")
+
+    button_frame = tk.Frame(root, height=1)
+    button_frame.pack(side='bottom', anchor='center')
+
+    bottom_frame = tk.Frame(root, height=410)
+    bottom_frame.pack(fill="both", expand=True)
+
+    header = tk.Label(top_frame, text="QuickFlash " + identifier + " v" + version + " - CH341A_SPI", font=("Arial", 16))
+    header.pack(fill='x', anchor="center")
+
+    init_button = tk.Button(button_frame, text="Initialize", command=lambda: init())
+    init_button.pack(side="left", padx=0, pady=(0, 8))
+
+    autoflash_button = tk.Button(button_frame, text="Autoflash", command=lambda: autoflash(), state="disabled")
+    autoflash_button.pack(side="left", padx=0, pady=(0, 8))
+
+    read_save_button = tk.Button(button_frame, text="Read & Save", command=lambda: readsave(), state="disabled")
+    read_save_button.pack(side="left", padx=0, pady=(0, 8))
+
+    erase_button = tk.Button(button_frame, text="Erase & Blank check", command=lambda: erase(), state="disabled")
+    erase_button.pack(side="left", padx=0, pady=(0, 8))
+
+    clear_button = tk.Button(button_frame, text="Reset", command=lambda: terminalwipe(), state="disabled")
+    clear_button.pack(side="left", padx=0, pady=(0, 8))
+
+    exit_button = tk.Button(button_frame, text="Exit", command=root.destroy)
+    exit_button.pack(side="left", padx=0, pady=(0, 8))
 
 terminal_header = tk.Label(bottom_frame, text="↓ Terminal output ↓")
 terminal_header.pack(anchor='center', pady=2)
 global terminal_output
-terminal_output = tk.Text(bottom_frame, font=("Courier New", 14))
+if sys.platform == 'win32':
+    terminal_output = tk.Text(bottom_frame, font=("Consolas", 10))
+elif sys.platform == 'darwin':
+    terminal_output = tk.Text(bottom_frame, font=("Courier New", 12))
+else:
+    terminal_output = tk.Text(bottom_frame, font=("Courier New", 12))
 terminal_output.pack(fill="both", expand=True)
 terminal_output.config(state="disabled")
 progress_bar = ttk.Progressbar(root, mode='indeterminate')
