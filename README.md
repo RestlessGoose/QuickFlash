@@ -32,10 +32,11 @@ Building
 --------
 1. Download this repo as a Zip and extract it.
 2. Right click the highlighted folder -> Services -> New Terminal at Folder
-3. Run the build script: `./build`
-4. Go inside the "App" folder and double-click the dmg to mount it.
-5. Drag QuickFlash.app to the Applications folder
-6. Right click on empty space on the dmg -> Eject
+3. Make build script executable: `chmod +x build`
+4. Run the build script: `./build`
+5. Go inside the "App" folder and double-click the dmg to mount it.
+6. Drag QuickFlash.app to the Applications folder
+7. Right click on empty space on the dmg -> Eject
 
 Usage
 -----
