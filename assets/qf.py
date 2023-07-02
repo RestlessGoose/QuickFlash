@@ -13,9 +13,8 @@ import atexit
 import shutil
 import threading
 import math
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtGui import QIcon
 import webbrowser
+import re
 
 def exit_handler():
     print("Exiting QuickFlash...\nDeleting any temporary files...")
@@ -30,9 +29,81 @@ global length
 length = 320
 global start_offset
 start_offset = 0x0
+global file_path
+file_path = ''
 
-version = "0.3.0"
+version = "0.4.0"
 identifier = "Beta"
+
+def alert(sound):
+    if sys.platform == 'win32':
+        import winsound
+        # Play system default sound
+        winsound.PlaySound("*", winsound.SND_ALIAS)
+    elif sys.platform == 'darwin':
+        # os.system("afplay /System/Library/Sounds/Purr.aiff")
+        subprocess.Popen(["afplay", "/System/Library/Sounds/" + sound + ".aiff"])
+    else:
+        # os.system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga")
+        subprocess.Popen(["paplay", "/usr/share/sounds/freedesktop/stereo/complete.oga"])
+
+def hexjump():
+    if file_path=='':
+        alert("Hero")
+        mbox.showwarning("Warning", "No file opened on the hex viewer yet.")
+    else:
+        hexjump_window()
+        
+def hexjump_window():
+    def cancel():
+        window.destroy()
+    def ok():
+        def floor_to_nearest_16(number):
+            return math.floor(number / 16) * 16
+        if mode_var.get()=="Decimal":
+            pattern = textbox.get()
+            if pattern.isdigit():
+                update_start_offset(floor_to_nearest_16(int(textbox.get())))
+                window.destroy()
+            else:
+                alert("Sosumi")
+        elif mode_var.get()=="Hexadecimal":
+            pattern = re.compile(r'^[0-9A-Fa-f]+$')
+            if pattern.match(textbox.get()):
+                update_start_offset(floor_to_nearest_16(int(textbox.get(), 16)))
+                window.destroy()
+            else:
+                alert("Sosumi")
+    global window
+    window = tk.Toplevel()
+    window.title("Offset")
+    wwidth = 400
+    wheight = 102
+    wscreen_width = root.winfo_screenwidth()
+    wscreen_height = root.winfo_screenheight()
+    wx = round((wscreen_width/2) - (wwidth/2))
+    wy = round((wscreen_height/2) - (wheight/2))
+    window.geometry(str(wwidth) + "x" + str(wheight) + "+" + str(wx) + "+" + str(wy))
+    window.protocol("WM_DELETE_WINDOW", lambda: None)
+    window.resizable(False, False)
+    mode_var = tk.StringVar()
+    mode_var.set("Hexadecimal")
+    decimal_radio = tk.Radiobutton(window, text="Decimal", variable=mode_var, value="Decimal")
+    hex_radio = tk.Radiobutton(window, text="Hexadecimal", variable=mode_var, value="Hexadecimal")
+    textbox = tk.Entry(window)
+    ok_button = ttk.Button(window, text="OK", command=ok)
+    cancel_button = ttk.Button(window, text="Cancel", command=cancel)
+    decimal_radio.grid(row=0, column=0, sticky="w", padx=(110,0), pady=(7,0))
+    hex_radio.grid(row=0, column=1, sticky="w", pady=(7,0), padx=(14,0))
+    textbox.grid(row=1, column=0, columnspan=2, padx=10, pady=(2,0), sticky="we")
+    ok_button.grid(row=2, column=1, padx=(10,13), pady=(2,10), sticky="e")
+    cancel_button.grid(row=2, column=1, padx=(0,118), pady=(2,10), sticky="e")
+    window.columnconfigure(0, weight=1)
+    window.columnconfigure(1, weight=1)
+    window.grab_set()
+    window.focus_set()
+    window.wait_window()
+
 
 def enable_main_buttons():
     button_erase.config(state="normal", style="Style2.TButton")
@@ -69,6 +140,7 @@ def read_hex_data(file_path, start_offset, length):
             offset += len(chunk_data)
     return formatted_data[:-1]
 
+global update_start_offset
 def update_start_offset(new_offset):
     text.configure(state="normal")
     global start_offset
@@ -78,6 +150,7 @@ def update_start_offset(new_offset):
     hex_data = read_hex_data(file_path, start_offset, length)
     text.insert('1.0', hex_data)
     text.configure(state="disabled")
+    slider.set(start_offset)
 
 def slider_update_start_offset(arg1):
     text.configure(state="normal")
@@ -122,6 +195,7 @@ def open_file():
 def save_file():
     content = text.get("1.0", "end-1c")
     if not content:
+        alert("Hero")
         mbox.showwarning("Warning", "No file is opened that you can save.")
     else:
         save_file = asksaveasfilename()
@@ -134,6 +208,7 @@ def select_option(arg1):
     global selected_option
     selected_option = arg1
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Initialization complete!\n    Selected chip model: " + arg1), arg2="tag2")
+    alert("Blow")
     popupdropdown["menu"].delete(0, "end")
     enable_main_buttons()
     label.configure(text="Status: READY")
@@ -157,9 +232,11 @@ def flashrom_exists2():
             results_list.append(result)
     terminalappend(arg1=("\n  !!Please choose chip model on the bottom-left corner!!\n    Chip model(s) found: " + str(results_list)) + "\n", arg2="tag2")
     if len(results_list) == 0:
+        alert("Hero")
         mbox.showwarning("Fatal error", "Flashrom did not find any chips.\nCH341A programmer is not plugged in or working properly.")
         button_initialize.configure(state="normal", style="Style2.TButton")
     else:
+        alert("Tink")
         popupdropdown["menu"].delete(0)
         for line in results_list:
             popupdropdown["menu"].add_command(label=str(line), command=lambda: select_option(arg1=(line)))
@@ -192,12 +269,14 @@ def initialize():
         flashrom_exists()
     except subprocess.CalledProcessError:
         # flashrom is not installed
+        alert("Hero")
         mbox.showwarning("Fatal error", "Flashrom is not installed.\nCheck the Readme for troubleshooting.")
         root.destroy()
     
 def flash():
     content = text.get("1.0", "end-1c")
     if not content:
+        alert("Hero")
         mbox.showwarning("Warning", "No file is opened that you can flash.")
     else:
         disable_main_buttons()
@@ -224,6 +303,7 @@ def flash():
             enable_main_buttons()
             label.configure(text="Status: READY")
             terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Flash complete.\n"), arg2="tag2")
+            alert("Blow")
         output_thread = threading.Thread(target=read_output)
         output_thread.start()
 
@@ -253,6 +333,7 @@ def read():
             terminal_output.see(tk.END)
             terminal_output.configure(state="disabled")
         terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Read complete.\n"), arg2="tag2")
+        alert("Blow")
         text.config(state="normal")
         text.delete('1.0', tk.END)
         # Read the file length
@@ -296,12 +377,14 @@ def erase():
         enable_main_buttons()
         label.configure(text="Status: READY")
         terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Erase complete.\n"), arg2="tag2")
+        alert("Blow")
     output_thread = threading.Thread(target=read_output)
     output_thread.start()
 
 def verify():
     content = text.get("1.0", "end-1c")
     if not content:
+        alert("Hero")
         mbox.showwarning("Warning", "No file is opened that you can verify against.")
     else:
         disable_main_buttons()
@@ -324,6 +407,7 @@ def verify():
             enable_main_buttons()
             label.configure(text="Status: READY")
             terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Verify complete.\n"), arg2="tag2")
+            alert("Blow")
         output_thread = threading.Thread(target=read_output)   
         output_thread.start()
 
@@ -337,6 +421,7 @@ def install_flashrom():
             subprocess.check_output(['which', '/opt/local/bin/flashrom'])
             mbox.showinfo("Info", "Homebrew and flashrom are already installed on your Mac.")
         except subprocess.CalledProcessError:
+            alert("Hero")
             mbox.showwarning("Warning", "Homebrew is already installed on your Mac, but flashrom is not. QuickFlash will open a Terminal window and install it for you.")
             shell_script = '#!/bin/bash\n/usr/local/bin/brew install flashrom'
             # Save the shell script to a temporary file
@@ -348,6 +433,7 @@ def install_flashrom():
             subprocess.call(['open', '-a', 'Terminal', '/tmp/homebrew_install.sh'])
 
     except subprocess.CalledProcessError:
+        alert("Hero")
         mbox.showwarning("Warning", "Homebrew is not installed on your Mac. QuickFlash will open a Terminal window and install it for you, along with flashrom.")
         # Command to execute
         shell_script = '#!/bin/bash\n/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"\n/usr/local/bin/brew install flashrom'
@@ -393,11 +479,13 @@ x = round((screen_width/2) - (width/2))
 y = round((screen_height/2) - (height/2))
 root.geometry(str(width) + "x" + str(height) + "+" + str(x) + "+" + str(y))
 root.resizable(False, True)
-#PyQt code just to change dock icon
-app = QApplication([])
-app.setWindowIcon(QIcon('ApplicationStub.icns'))
 
 if sys.platform == 'darwin':
+    #PyQt code just to change dock icon
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import QIcon
+    app = QApplication([])
+    app.setWindowIcon(QIcon('ApplicationStub.icns'))
     global mac_version
     mac_version = platform.mac_ver()[0]
 else:
@@ -491,13 +579,12 @@ menubar.add_cascade(label="Tools", menu=tools_menu)
 tools_menu.add_command(label="Install Driver", command=install_driver)
 tools_menu.add_command(label="Install Flashrom", command=install_flashrom)
 
-#hex_menu = tk.Menu(menubar, tearoff=False)
-#menubar.add_cascade(label="Hex Viewer", menu=hex_menu)
-#hex_menu.add_command(label="Jump to offset", command=hex_jump)
-
 term_menu = tk.Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Terminal", menu=term_menu)
 term_menu.add_command(label="Clear contents", command=terminalwipe)
 
+hex_menu = tk.Menu(menubar, tearoff=False)
+menubar.add_cascade(label="Hex Viewer", menu=hex_menu)
+hex_menu.add_command(label="Jump to offset", command=hexjump)
+
 root.mainloop()
-#sys.exit(app.exec_())
