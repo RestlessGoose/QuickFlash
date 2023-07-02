@@ -4,7 +4,9 @@ mkdir base/MacOS
 mkdir App
 mkdir App/qf
 mkdir App/qf/Contents
-cp bin/Automator\ Application\ Stub base/MacOS
+
+cp bin/QuickFlash base/MacOS
+chmod +x base/MacOS/QuickFlash
 
 cp assets/1.png base/Resources
 cp assets/ApplicationStub.icns base/Resources
@@ -14,40 +16,15 @@ cp assets/qf.py base/Resources
 cp -R base/ App/qf/Contents
 mv App/qf App/QuickFlash.app
 
-
-
-# Define the paths and filenames
 app_file="App/QuickFlash.app"
-dmg_file="App/QuickFlash-Beta-v0_3_.dmg"
+dmg_file="App/QuickFlash-Beta-v0_4_.dmg"
 alias_name="QuickFlash Beta"
 sudo ln -s "/Applications" "App/"
-
-# Create a new blank disk image
 sudo hdiutil create -volname "$alias_name" -fs HFS+ -srcfolder "App/" "$dmg_file"
-
 wait
-
 sudo hdiutil attach "$dmg_file"
-
-#wait
-
-# Copy the .app file to the mounted image
-#sudo cp -R "$app_file" "/Volumes/$alias_name/"
-
-#wait
-
-# Create an alias to /Applications/
-#sudo ln -s "/Applications" "/Volumes/$alias_name/"
-
 wait
-
-# Make the disk image read-only
-sudo hdiutil convert "$dmg_file" -format UDZO -o "App/QuickFlash-Beta-v0_3_0.dmg"
-
+sudo hdiutil convert "$dmg_file" -format UDZO -o "App/QuickFlash-Beta-v0_4_0.dmg"
 wait
-
-# Unmount the disk image
 sudo hdiutil detach "/Volumes/QuickFlash Beta"
-
-# Delete read-write image
-sudo rm -rf "App/QuickFlash-Beta-v0_3_.dmg"
+sudo rm -rf "App/QuickFlash-Beta-v0_4_.dmg"
