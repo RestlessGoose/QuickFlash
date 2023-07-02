@@ -73,7 +73,6 @@ def update_start_offset(new_offset):
     text.configure(state="normal")
     global start_offset
     start_offset = new_offset
-    #print(start_offset)
     length = 320
     text.delete('1.0', tk.END)
     hex_data = read_hex_data(file_path, start_offset, length)
@@ -84,9 +83,7 @@ def slider_update_start_offset(arg1):
     text.configure(state="normal")
     global start_offset
     sliderval = math.floor(float(slider.get()))
-    #print(sliderval)
     rounded_sliderval = (sliderval + 8) // 16 * 16
-    #print(rounded_sliderval)
     start_offset = rounded_sliderval
     length = 320
     text.delete('1.0', tk.END)
@@ -129,19 +126,15 @@ def save_file():
     else:
         save_file = asksaveasfilename()
         if save_file:
-        # File path is available, you can use it for saving the file
-            #print("Selected file path:", save_file)
             shutil.copy(file_path, save_file)
             root.title("QuickFlash " + identifier + " - " + save_file)
 
 def select_option(arg1):
     opt.set(arg1)
-    #print(arg1)
     global selected_option
     selected_option = arg1
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Initialization complete!\n    Selected chip model: " + arg1), arg2="tag2")
     popupdropdown["menu"].delete(0, "end")
-    #popupdropdown.destroy()
     enable_main_buttons()
     label.configure(text="Status: READY")
     button_initialize.configure(state="normal", style="Style2.TButton")
@@ -163,7 +156,6 @@ def flashrom_exists2():
             result = line[start_index + 1:end_index] 
             results_list.append(result)
     terminalappend(arg1=("\n  !!Please choose chip model on the bottom-left corner!!\n    Chip model(s) found: " + str(results_list)) + "\n", arg2="tag2")
-    #popupdropdown.pack(pady=(8, 10), expand=True, fill='x', padx= 10)
     if len(results_list) == 0:
         mbox.showwarning("Fatal error", "Flashrom did not find any chips.\nCH341A programmer is not plugged in or working properly.")
         button_initialize.configure(state="normal", style="Style2.TButton")
@@ -204,7 +196,7 @@ def initialize():
         root.destroy()
     
 def flash():
-    content = text.get("1.0", "end-1c")  # Get the text content, excluding the trailing newline character
+    content = text.get("1.0", "end-1c")
     if not content:
         mbox.showwarning("Warning", "No file is opened that you can flash.")
     else:
