@@ -236,21 +236,16 @@ def flash():
         output_thread.start()
 
 def read():
-    #create_temp_folder()
     current_datetime = datetime.datetime.now()
     formatted_datetime = current_datetime.strftime("%Y%m%d_%H%M%S")
-    #print(formatted_datetime)
-    #print("/tmp/qf-" + formatted_datetime)
     global file_path
     file_path = "/tmp/qf-" + formatted_datetime + "/" + formatted_datetime + ".rom"
-    #print("file_path: " + file_path)
     os.system("mkdir " + "/tmp/qf-" + formatted_datetime)
     os.system("touch " + file_path)
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Starting read procedure.\n"), arg2="tag2")
     disable_main_buttons()
     label.configure(text="Status: BUSY")
     left_frame.update_idletasks()
-    #print(vBool.get())
     if vBool.get()==True:
         command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-r", str(file_path), "--verbose"]
     elif vBool.get()==False:
@@ -388,8 +383,6 @@ def terminalwipe():
     terminal_output.delete(1.0, tk.END)
     terminal_output.config(state="disabled")
     button_initialize.config(state="normal")
-    #disablemainbuttons()
-    #alert(sound="Frog")
 
 global terminalappend
 def terminalappend(arg1, arg2):
@@ -415,8 +408,6 @@ app.setWindowIcon(QIcon('ApplicationStub.icns'))
 if sys.platform == 'darwin':
     global mac_version
     mac_version = platform.mac_ver()[0]
-    #print("MacOS Version: " + mac_version)
-    # mbox.showinfo("Message", "Supported platform")
 else:
     mbox.showwarning("Warning", "Unsupported platform.")
 
@@ -451,7 +442,6 @@ autoverify.pack(anchor='w', padx=(8,0))
 vBool = tk.BooleanVar()
 verbose = tk.Checkbutton(left_frame, text="Enable more verbose", variable=vBool, background="SystemTransparent", state="disabled")
 verbose.pack(anchor='w', padx=(8,0))
-#print("\nCurrent directory:" + os.getcwd())
 bottomleft_frame = tk.Frame(left_frame, background="SystemTransparent")
 bottomleft_frame.pack(side=tk.BOTTOM, expand=False)
 image = Image.open("1.png")
@@ -494,7 +484,6 @@ terminal_output = tk.Text(right_frame, width=80, bg='black', fg='white', state="
 terminal_output.pack(fill=tk.BOTH, expand=True)
 terminal_output.tag_configure("tag1", foreground="white")
 terminal_output.tag_configure("tag2", foreground="#89CFF0")
-# terminalappend(arg1=("Current directory:" + os.getcwd()))
 
 # Menubar management
 menubar = tk.Menu(root)
