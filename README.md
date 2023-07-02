@@ -16,8 +16,8 @@ Prerequisites
 - Mac or hackintosh
 - CH341A programmer
 - Python 3
--   Pillow
--   PyQt5
+    - Pillow
+    - PyQt5
 - flashrom
 
 Preparation
