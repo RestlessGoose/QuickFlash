@@ -2,7 +2,6 @@
 ### Python tool to easily utilize flashrom via a graphical interface. 
 
 ### Disclaimer: I am not responsible for bricked devices, data loss, dead chips, thermonuclear war, or the current economic crisis caused by you using this piece of software. Please use with caution while keeping in mind that this is *beta stage* software and is not guaranteed to have 100% stability. 
-
 ### This tool does not support Windows or Linux yet.
 
 ## Screenshot
