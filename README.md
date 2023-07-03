@@ -11,6 +11,13 @@
 </picture>
 
 
+Officially Tested on:
+---------------------
+| Device              | Platform           | Status           |
+|---------------------|--------------------|------------------|
+| Dell Latitude E6440 | MacOS Ventura 13.4 | Fully functional |
+
+
 Prerequisites
 -------------
 - Mac or hackintosh
