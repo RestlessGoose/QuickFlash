@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
+from tkinter import ttk, filedialog
 from tkinter.filedialog import asksaveasfilename
 import platform
 import sys
@@ -32,20 +31,21 @@ start_offset = 0x0
 global file_path
 file_path = ''
 
-version = "0.4.0"
+version = "0.4.2"
 identifier = "Beta"
 
 def alert(sound):
-    if sys.platform == 'win32':
-        import winsound
-        # Play system default sound
-        winsound.PlaySound("*", winsound.SND_ALIAS)
-    elif sys.platform == 'darwin':
-        # os.system("afplay /System/Library/Sounds/Purr.aiff")
-        subprocess.Popen(["afplay", "/System/Library/Sounds/" + sound + ".aiff"])
-    else:
-        # os.system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga")
-        subprocess.Popen(["paplay", "/usr/share/sounds/freedesktop/stereo/complete.oga"])
+    if mBool.get()==False:
+        if sys.platform == 'win32':
+            import winsound
+            # Play system default sound
+            winsound.PlaySound("*", winsound.SND_ALIAS)
+        elif sys.platform == 'darwin':
+            # os.system("afplay /System/Library/Sounds/Purr.aiff")
+            subprocess.Popen(["afplay", "/System/Library/Sounds/" + sound + ".aiff"])
+        else:
+            # os.system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga")
+            subprocess.Popen(["paplay", "/usr/share/sounds/freedesktop/stereo/complete.oga"])
 
 def hexjump():
     if file_path=='':
@@ -138,14 +138,14 @@ def read_hex_data(file_path, start_offset, length):
             formatted_data += formatted_line
             length -= len(chunk_data)
             offset += len(chunk_data)
-    return formatted_data[:-1]
+    return "            ⁰⁰ ⁰¹ ⁰² ⁰³ ⁰⁴ ⁰⁵ ⁰⁶ ⁰⁷ ⁰⁸ ⁰⁹ ⁰ᴬ ⁰ᴮ ⁰ᶜ ⁰ᴰ ⁰ᴱ ⁰ᶠ     ⁰¹²³⁴⁵⁶⁷⁸⁹ᴬᴮᶜᴰᴱᶠ\n" + formatted_data[:-1]
 
 global update_start_offset
 def update_start_offset(new_offset):
     text.configure(state="normal")
     global start_offset
     start_offset = new_offset
-    length = 320
+    length = 304
     text.delete('1.0', tk.END)
     hex_data = read_hex_data(file_path, start_offset, length)
     text.insert('1.0', hex_data)
@@ -158,7 +158,7 @@ def slider_update_start_offset(arg1):
     sliderval = math.floor(float(slider.get()))
     rounded_sliderval = (sliderval + 8) // 16 * 16
     start_offset = rounded_sliderval
-    length = 320
+    length = 304
     text.delete('1.0', tk.END)
     hex_data = read_hex_data(file_path, start_offset, length)
     text.insert('1.0', hex_data)
@@ -186,10 +186,14 @@ def open_file():
         slider.configure(state="normal")
         slider.configure(to=(file_length - 16))
         start_offset = 0x0
-        length = 320
+        length = 304
         hex_data = read_hex_data(file_path, start_offset, length)
         text.insert('1.0', hex_data)
         root.title("QuickFlash " + identifier + " - " + file_path)
+    else:
+        increase_button.config(state="disabled")
+        decrease_button.configure(state="disabled")
+        slider.configure(state="disabled")
     text.config(state="disabled")
 
 def save_file():
@@ -242,10 +246,9 @@ def flashrom_exists2():
             popupdropdown["menu"].add_command(label=str(line), command=lambda: select_option(arg1=(line)))
         opt.set(str(results_list[0]))
         
-
 def flashrom_exists():
     terminalwipe()
-    terminalappend(arg1=('MacOS Version: ' + mac_version + "\n"), arg2="tag1")
+    terminalappend(arg1=('MacOS Version: ' + mac_version + "\n"), arg2="tag2")
     command = ["/opt/local/bin/flashrom", "--version"]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     def read_output():
@@ -255,7 +258,7 @@ def flashrom_exists():
                 break
             terminal_output.configure(state="normal")
             terminal_output.insert(tk.END, output)
-            terminal_output.see(tk.END)  # Scroll to the end of the text widget
+            terminal_output.see(tk.END)
             terminal_output.configure(state="disabled")
         flashrom_exists2()
     output_thread = threading.Thread(target=read_output)
@@ -471,7 +474,7 @@ def terminalappend(arg1, arg2):
 
 root = tk.Tk()
 root.title("QuickFlash " + identifier)
-width = 840
+width = 865
 height = 620
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -479,6 +482,7 @@ x = round((screen_width/2) - (width/2))
 y = round((screen_height/2) - (height/2))
 root.geometry(str(width) + "x" + str(height) + "+" + str(x) + "+" + str(y))
 root.resizable(False, True)
+root.minsize(865,600)
 
 if sys.platform == 'darwin':
     #PyQt code just to change dock icon
@@ -522,12 +526,15 @@ autoverify.pack(anchor='w', padx=(8,0))
 vBool = tk.BooleanVar()
 verbose = tk.Checkbutton(left_frame, text="Enable more verbose", variable=vBool, background="SystemTransparent", state="disabled")
 verbose.pack(anchor='w', padx=(8,0))
+mBool = tk.BooleanVar()
+mute = tk.Checkbutton(left_frame, text="Mute sound effects", variable=mBool, background="SystemTransparent", state="normal")
+mute.pack(anchor='w', padx=(8,0))
 bottomleft_frame = tk.Frame(left_frame, background="SystemTransparent")
 bottomleft_frame.pack(side=tk.BOTTOM, expand=False)
 image = Image.open("1.png")
 photo = ImageTk.PhotoImage(image)
 photo1 = ttk.Label(bottomleft_frame, image=photo, style='Transparent.TLabel')
-photo1.pack(padx=60)
+photo1.pack(padx=48)
 photo1.configure()
 label = tk.Label(bottomleft_frame, text="Status: READY", background="SystemTransparent")
 label.pack()
@@ -538,21 +545,29 @@ opt.set(str(results_list[0]))
 popupdropdown = tk.OptionMenu(bottomleft_frame, opt, *results_list)
 popupdropdown.configure(width=10)
 popupdropdown.pack(pady=(8, 10), expand=False, fill='x', padx= 10, anchor='s')
+popupdropdown["menu"].delete(0)
 
 # Hex viewer frame
-middle_frame = tk.Frame(root)
-middle_frame.pack(padx=0, pady=0, fill=tk.BOTH, side=tk.TOP)
-hexlabel = tk.Label(middle_frame, text="HEX VIEWER", foreground="#7F7F7F", font=("TkDefaultFont", 12, "bold"))
+outoutmiddle_frame = tk.Frame(root)
+outoutmiddle_frame.pack(padx=0, pady=0, fill=tk.BOTH, side=tk.TOP)
+hexlabel = tk.Label(outoutmiddle_frame, text="HEX VIEWER", foreground="#7F7F7F", font=("TkDefaultFont", 12, "bold"))
 hexlabel.pack()
+outmiddle_frame = tk.Frame(outoutmiddle_frame)
+outmiddle_frame.pack()
+middle_frame = tk.Frame(outmiddle_frame)
+middle_frame.grid()
 text = tk.Text(middle_frame, height=20, width=80, state="disabled", font="Courier")
-text.pack(fill=tk.BOTH)
+text.grid(row=0, column=0, sticky='nsw',rowspan=3, ipadx=1)
 style1.configure("Narrow.TButton", width=1)
-decrease_button = ttk.Button(middle_frame, text='<', command=decrease_offset, state="disabled", style="Narrow.TButton")
-decrease_button.pack(side=tk.LEFT)
-slider = ttk.Scale(middle_frame, from_=0, to=(file_length - 16), orient=tk.HORIZONTAL, command=slider_update_start_offset, state="disabled")
-slider.pack(side=tk.LEFT, fill='x', expand=True)
-increase_button = ttk.Button(middle_frame, text='>', command=increase_offset, state="disabled", style="Narrow.TButton")
-increase_button.pack(side=tk.LEFT)
+decrease_button = ttk.Button(middle_frame, text='▲', command=decrease_offset, state="disabled", style="Narrow.TButton")
+decrease_button.grid(row=0, column=0, sticky='n',padx=(636,0))
+slider = ttk.Scale(middle_frame, from_=0, to=(file_length - 16), orient=tk.VERTICAL, command=slider_update_start_offset, state="disabled")
+slider.grid(row=1, column=0, sticky='ns',rowspan=1, ipady=55, padx=(638,0))
+increase_button = ttk.Button(middle_frame, text='▼', command=increase_offset, state="disabled", style="Narrow.TButton")
+increase_button.grid(row=2, column=0, sticky='s',padx=(636,0))
+buttoncover = tk.Frame(middle_frame, width=10)
+buttoncover.grid(row=0, column=0, rowspan=3, sticky='ns', padx=(669,0))
+text.lift()
 slider.set(start_offset)
 
 # Terminal output frame
