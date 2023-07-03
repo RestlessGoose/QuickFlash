@@ -24,7 +24,7 @@ sudo hdiutil create -volname "$alias_name" -fs HFS+ -srcfolder "App/" "$dmg_file
 wait
 sudo hdiutil attach "$dmg_file"
 wait
-sudo hdiutil convert "$dmg_file" -format UDZO -o "App/QuickFlash-Beta-v0_4_0.dmg"
+sudo hdiutil convert "$dmg_file" -format UDZO -o "App/QuickFlash-Beta-v0_4_2.dmg"
 wait
 sudo hdiutil detach "/Volumes/QuickFlash Beta"
 sudo rm -rf "App/QuickFlash-Beta-v0_4_.dmg"
