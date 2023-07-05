@@ -4,7 +4,6 @@ from tkinter.filedialog import asksaveasfilename
 import platform
 import sys
 import tkinter.messagebox as mbox
-from PIL import ImageTk, Image
 import os
 import subprocess
 import datetime
@@ -14,25 +13,46 @@ import threading
 import math
 import webbrowser
 import re
+sys.path.append(".")
+import usb
+from PIL import ImageTk, Image
 
 def exit_handler():
     print("Exiting QuickFlash...\nDeleting any temporary files...")
     os.system("find /tmp/ -type d -name 'qf-*' -exec rm -r {} +")
     subprocess.call(['rm', '/tmp/homebrew_install.sh'])
+    print("done\nStopping threads...")
+    global exit_flag
+    exit_flag = True
     print("done")
 
 atexit.register(exit_handler)
 
 file_length = 0
 global length
-length = 320
+length = 304
 global start_offset
 start_offset = 0x0
 global file_path
 file_path = ''
+global exit_flag
+exit_flag = False
 
-version = "0.4.2"
+version = "0.5.0"
 identifier = "Beta"
+
+def handle_usb_events():
+    while not exit_flag:
+        # Wait for a USB event (device connection or disconnection)
+        usb.core.find(find_all=True)
+        # Find USB device with the specified vendor and product IDs
+        device = usb.core.find(idVendor=0x1a86, idProduct=0x5512)
+        if device is not None:
+            # Device is connected
+            usblabel.config(text="Device state: Connected", fg="green")
+        else:
+            # Device is disconnected
+            usblabel.config(text="Device state: Not Connected", fg="red")
 
 def alert(sound):
     if mBool.get()==False:
@@ -113,6 +133,16 @@ def enable_main_buttons():
     button_verify.config(state="normal", style="Style2.TButton")
     autoverify.configure(state="normal")
     verbose.configure(state="normal")
+    root.bind_all("<Command-i>",menuinitialize)
+    root.bind_all("<Command-f>",menuflash)
+    root.bind_all("<Command-r>",menuread)
+    root.bind_all("<Command-w>",menuerase)
+    root.bind_all("<Command-v>",menuverify)
+    file_menu.entryconfig(3, state="normal")
+    file_menu.entryconfig(4, state="normal")
+    file_menu.entryconfig(5, state="normal")
+    file_menu.entryconfig(6, state="normal")
+    file_menu.entryconfig(7, state="normal")
 
 def disable_main_buttons():
     button_erase.config(state="disabled", style="Custom.TButton")
@@ -122,6 +152,17 @@ def disable_main_buttons():
     button_verify.config(state="disabled", style="Custom.TButton")
     autoverify.configure(state="disabled")
     verbose.configure(state="disabled")
+    root.unbind_all("<Command-i>")
+    root.unbind_all("<Command-f>")
+    root.unbind_all("<Command-r>")
+    root.unbind_all("<Command-w>")
+    root.unbind_all("<Command-v>")
+    file_menu.entryconfig(3, state="normal")
+    file_menu.entryconfig(4, state="disabled")
+    file_menu.entryconfig(5, state="disabled")
+    file_menu.entryconfig(6, state="disabled")
+    file_menu.entryconfig(7, state="disabled")
+
 
 def read_hex_data(file_path, start_offset, length):
     with open(file_path, 'rb') as file:
@@ -207,6 +248,13 @@ def save_file():
             shutil.copy(file_path, save_file)
             root.title("QuickFlash " + identifier + " - " + save_file)
 
+def detect_usb_device(vendor_id, product_id):
+    devices = usb.core.find(idVendor=vendor_id, idProduct=product_id)
+    if devices:
+        return True
+    else:
+        return False
+
 def select_option(arg1):
     opt.set(arg1)
     global selected_option
@@ -218,37 +266,44 @@ def select_option(arg1):
     label.configure(text="Status: READY")
     button_initialize.configure(state="normal", style="Style2.TButton")
 
-def flashrom_exists2():       
-    command = "/opt/local/bin/flashrom --programmer ch341a_spi | grep Found"
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    for line in iter(process.stdout.readline, b''):
-        terminalappend(arg1=line, arg2="tag1")
-        root.update_idletasks()
-    output, error = process.communicate()
-    output_text = terminal_output.get("1.0", "end-1c") 
-    lines = output_text.split("\n") 
-    results_list = [] 
-    for line in lines:
-        start_index = line.find('"')
-        end_index = line.find('"', start_index + 1) 
-        if start_index != -1 and end_index != -1: 
-            result = line[start_index + 1:end_index] 
-            results_list.append(result)
-    terminalappend(arg1=("\n  !!Please choose chip model on the bottom-left corner!!\n    Chip model(s) found: " + str(results_list)) + "\n", arg2="tag2")
-    if len(results_list) == 0:
-        alert("Hero")
-        mbox.showwarning("Fatal error", "Flashrom did not find any chips.\nCH341A programmer is not plugged in or working properly.")
-        button_initialize.configure(state="normal", style="Style2.TButton")
+def flashrom_exists2():
+    is_device_present = detect_usb_device(0x1a86, 0x5512)
+    if is_device_present:
+        command = "/opt/local/bin/flashrom --programmer ch341a_spi | grep Found"
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        for line in iter(process.stdout.readline, b''):
+            terminalappend(arg1=line, arg2="tag1")
+            root.update_idletasks()
+        output, error = process.communicate()
+        output_text = terminal_output.get("1.0", "end-1c") 
+        lines = output_text.split("\n") 
+        results_list = [] 
+        for line in lines:
+            start_index = line.find('"')
+            end_index = line.find('"', start_index + 1) 
+            if start_index != -1 and end_index != -1: 
+                result = line[start_index + 1:end_index] 
+                results_list.append(result)
+        terminalappend(arg1=("\n  !!Please choose chip model on the bottom-left corner!!\n    Chip model(s) found: " + str(results_list)) + "\n", arg2="tag2")
+        if len(results_list) == 0:
+            alert("Hero")
+            mbox.showwarning("Fatal error", "Flashrom did not find any chips.\nCH341A programmer is not plugged in or working properly.")
+            button_initialize.configure(state="normal", style="Style2.TButton")
+        else:
+            alert("Tink")
+            popupdropdown["menu"].delete(0)
+            for line in results_list:
+                popupdropdown["menu"].add_command(label=str(line), command=lambda: select_option(arg1=(line)))
+            opt.set(str(results_list[0]))
     else:
-        alert("Tink")
-        popupdropdown["menu"].delete(0)
-        for line in results_list:
-            popupdropdown["menu"].add_command(label=str(line), command=lambda: select_option(arg1=(line)))
-        opt.set(str(results_list[0]))
+        alert("Hero")
+        mbox.showerror("Error", "CH341A programmer is not detected to be plugged in.")
+        label.configure(text="Status: READY")
+        button_initialize.configure(state="normal", style="Style2.TButton")
         
 def flashrom_exists():
     terminalwipe()
-    terminalappend(arg1=('MacOS Version: ' + mac_version + "\n"), arg2="tag2")
+    terminalappend(arg1=('  MacOS Version: ' + mac_version + "\n"), arg2="tag2")
     command = ["/opt/local/bin/flashrom", "--version"]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     def read_output():
@@ -265,16 +320,17 @@ def flashrom_exists():
     output_thread.start() 
     
 def initialize():
-    label.config(text="Status: INITIALIZING")
-    button_initialize.configure(state="disabled", style="Custom.TButton")
-    try:
-        subprocess.check_output(['which', '/opt/local/bin/flashrom'])
-        flashrom_exists()
-    except subprocess.CalledProcessError:
-        # flashrom is not installed
-        alert("Hero")
-        mbox.showwarning("Fatal error", "Flashrom is not installed.\nCheck the Readme for troubleshooting.")
-        root.destroy()
+    if label.cget("text") == "Status: READY":
+        label.config(text="Status: INITIALIZING")
+        button_initialize.config(state="disabled", style="Custom.TButton")
+        try:
+            subprocess.check_output(['which', '/opt/local/bin/flashrom'])
+            flashrom_exists()
+        except subprocess.CalledProcessError:
+            # flashrom is not installed
+            alert("Hero")
+            mbox.showwarning("Fatal error", "Flashrom is not installed.\nCheck the Readme for troubleshooting.")
+            root.destroy()
     
 def flash():
     content = text.get("1.0", "end-1c")
@@ -350,7 +406,7 @@ def read():
         slider.configure(to=(file_length - 16))
         root.title("QuickFlash " + identifier + " - " + file_path)
         start_offset = 0x0
-        length = 320
+        length = 304
         hex_data = read_hex_data(file_path, start_offset, length)
         text.insert('1.0', hex_data)
         text.config(state="disabled")
@@ -422,6 +478,7 @@ def install_flashrom():
         subprocess.check_output(['which', '/usr/local/bin/brew'])
         try:
             subprocess.check_output(['which', '/opt/local/bin/flashrom'])
+            alert("Hero")
             mbox.showinfo("Info", "Homebrew and flashrom are already installed on your Mac.")
         except subprocess.CalledProcessError:
             alert("Hero")
@@ -471,6 +528,50 @@ def terminalappend(arg1, arg2):
     terminal_output.insert('end', arg1, arg2)
     terminal_output.see('end')
     terminal_output.config(state="disabled")
+
+def save_terminal_text():
+    text_content = terminal_output.get("1.0", "end-1c")  # Get the contents of the text widget
+    file_path = filedialog.asksaveasfilename(defaultextension=".log")  # Open the file dialog for saving
+    if file_path:
+        with open(file_path, "w") as file:
+            file.write(text_content)
+        print("File saved successfully.")
+
+def menuhexjump(arg):
+    hexjump()
+
+def menuopenfile(arg):
+    open_file()
+
+def menusavefile(arg):
+    save_file()
+
+def menusaveterminal(arg):
+    save_terminal_text()
+
+def menuinitialize(arg):
+    if label.cget("text") == "Status: READY":
+        initialize()
+
+global menuflash
+def menuflash(arg):
+    if label.cget("text") == "Status: READY":
+        flash()
+
+global menuread
+def menuread(arg):
+    if label.cget("text") == "Status: READY":
+        read()
+
+global menuerase
+def menuerase(arg):
+    if label.cget("text") == "Status: READY":
+        erase()
+
+global menuverify
+def menuverify(arg):
+    if label.cget("text") == "Status: READY":
+        verify()
 
 root = tk.Tk()
 root.title("QuickFlash " + identifier)
@@ -575,10 +676,20 @@ right_frame = tk.Frame(root)
 right_frame.pack(padx=0, pady=0, fill='both', expand=True, side=tk.BOTTOM, anchor='n')
 termlabel = tk.Label(right_frame, text="TERMINAL OUTPUT", foreground="#7F7F7F", font=("TkDefaultFont", 12, "bold"))
 termlabel.pack()
-terminal_output = tk.Text(right_frame, width=80, bg='black', fg='white', state="disabled", font=("Menlo", 11))
+terminal_output = tk.Text(right_frame, width=80, bg='black', fg='white', state="disabled", font=("Menlo", 11), height=19)
 terminal_output.pack(fill=tk.BOTH, expand=True)
 terminal_output.tag_configure("tag1", foreground="white")
 terminal_output.tag_configure("tag2", foreground="#89CFF0")
+bottomright_frame = tk.Frame(right_frame, background="SystemTransparent")
+bottomright_frame.pack(padx=0, pady=0, fill='x', expand=False, side=tk.BOTTOM, anchor='s')
+border = tk.Canvas(bottomright_frame, width=1, height=20, bg="#7F7F7F")
+border.pack(side=tk.LEFT)
+global usblabel
+usblabel = tk.Label(bottomright_frame, font=("TkDefaultFont", 12, "bold"), text=" ", background="SystemTransparent")
+usblabel.pack(anchor='e', pady=(0,4), padx=4)
+usb_thread = threading.Thread(target=handle_usb_events)
+usb_thread.daemon = True
+usb_thread.start()
 
 # Menubar management
 menubar = tk.Menu(root)
@@ -586,8 +697,16 @@ root.config(menu=menubar)
 
 file_menu = tk.Menu(menubar, tearoff=False)
 menubar.add_cascade(label="File", menu=file_menu)
-file_menu.add_command(label="Open", command=open_file)
-file_menu.add_command(label="Save", command=save_file)
+file_menu.add_command(label="Open", command=open_file, accelerator="Command+O")
+file_menu.add_command(label="Save", command=save_file, accelerator="Command+S")
+file_menu.add_separator()
+entryinitialize = file_menu.add_command(label="Initialize", command=initialize, accelerator="Command+I")
+entryflash = file_menu.add_command(label="Flash", command=flash, accelerator="Command+F", state="disabled")
+entryread = file_menu.add_command(label="Read", command=read, accelerator="Command+R", state="disabled")
+entryerase = file_menu.add_command(label="Erase", command=erase, accelerator="Command+W", state="disabled")
+entryverify = file_menu.add_command(label="Verify", command=verify, accelerator="Command+V", state="disabled")
+file_menu.add_separator()
+file_menu.add_command(label="Exit", command=root.destroy)
 
 tools_menu = tk.Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Tools", menu=tools_menu)
@@ -597,9 +716,16 @@ tools_menu.add_command(label="Install Flashrom", command=install_flashrom)
 term_menu = tk.Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Terminal", menu=term_menu)
 term_menu.add_command(label="Clear contents", command=terminalwipe)
+term_menu.add_command(label="Save contents to file", command=save_terminal_text, accelerator="Command+T")
 
 hex_menu = tk.Menu(menubar, tearoff=False)
 menubar.add_cascade(label="Hex Viewer", menu=hex_menu)
-hex_menu.add_command(label="Jump to offset", command=hexjump)
+hex_menu.add_command(label="Jump to offset", command=hexjump, accelerator="Command+E")
+
+root.bind_all("<Command-o>",menuopenfile)
+root.bind_all("<Command-s>",menusavefile)
+root.bind_all("<Command-e>",menuhexjump)
+root.bind_all("<Command-t>",menusaveterminal)
+root.bind_all("<Command-i>",menuinitialize)
 
 root.mainloop()
