@@ -13,7 +13,7 @@ import threading
 import math
 import webbrowser
 import re
-sys.path.append(".")
+sys.path.append('.')
 import usb
 from PIL import ImageTk, Image
 
@@ -38,8 +38,13 @@ file_path = ''
 global exit_flag
 exit_flag = False
 
-version = "0.5.0"
+version = "0.5.1"
 identifier = "Beta"
+global flashrompath
+flashrompath = "/opt/local/bin/flashrom"
+
+def updatelabel(arg):
+    label_var.set(arg)
 
 def handle_usb_events():
     while not exit_flag:
@@ -263,13 +268,13 @@ def select_option(arg1):
     alert("Blow")
     popupdropdown["menu"].delete(0, "end")
     enable_main_buttons()
-    label.configure(text="Status: READY")
+    updatelabel("Status: READY")
     button_initialize.configure(state="normal", style="Style2.TButton")
 
 def flashrom_exists2():
     is_device_present = detect_usb_device(0x1a86, 0x5512)
     if is_device_present:
-        command = "/opt/local/bin/flashrom --programmer ch341a_spi | grep Found"
+        command = flashrompath + " --programmer ch341a_spi | grep Found"
         process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
         for line in iter(process.stdout.readline, b''):
             terminalappend(arg1=line, arg2="tag1")
@@ -289,6 +294,7 @@ def flashrom_exists2():
             alert("Hero")
             mbox.showwarning("Fatal error", "Flashrom did not find any chips.\nCH341A programmer is not plugged in or working properly.")
             button_initialize.configure(state="normal", style="Style2.TButton")
+            label.after(0, updatelabel("Status: READY"))
         else:
             alert("Tink")
             popupdropdown["menu"].delete(0)
@@ -298,13 +304,13 @@ def flashrom_exists2():
     else:
         alert("Hero")
         mbox.showerror("Error", "CH341A programmer is not detected to be plugged in.")
-        label.configure(text="Status: READY")
         button_initialize.configure(state="normal", style="Style2.TButton")
+        label.after(0, updatelabel("Status: READY"))
         
 def flashrom_exists():
     terminalwipe()
     terminalappend(arg1=('  MacOS Version: ' + mac_version + "\n"), arg2="tag2")
-    command = ["/opt/local/bin/flashrom", "--version"]
+    command = [flashrompath, "--version"]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     def read_output():
         while True:
@@ -321,10 +327,10 @@ def flashrom_exists():
     
 def initialize():
     if label.cget("text") == "Status: READY":
-        label.config(text="Status: INITIALIZING")
+        updatelabel("Status: INITIALIZING")
         button_initialize.config(state="disabled", style="Custom.TButton")
         try:
-            subprocess.check_output(['which', '/opt/local/bin/flashrom'])
+            subprocess.check_output(['which', flashrompath])
             flashrom_exists()
         except subprocess.CalledProcessError:
             # flashrom is not installed
@@ -339,16 +345,16 @@ def flash():
         mbox.showwarning("Warning", "No file is opened that you can flash.")
     else:
         disable_main_buttons()
-        label.configure(text="Status: BUSY")
+        updatelabel("Status: BUSY")
         terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Starting flash procedure.\n"), arg2="tag2")
         if avfBool.get()==True and vBool.get()==True:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--noverify", "--verbose"]
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--noverify", "--verbose"]
         elif avfBool.get()==False and vBool.get()==True:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--verbose"]
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--verbose"]
         elif avfBool.get()==True and vBool.get()==False:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--noverify"]
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path), "--noverify"]
         elif avfBool.get()==False and vBool.get()==False:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path)]            
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-w", str(file_path)]            
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         def read_output():
             while True:
@@ -360,7 +366,7 @@ def flash():
                 terminal_output.see(tk.END)
                 terminal_output.configure(state="disabled")
             enable_main_buttons()
-            label.configure(text="Status: READY")
+            updatelabel("Status: READY")
             terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Flash complete.\n"), arg2="tag2")
             alert("Blow")
         output_thread = threading.Thread(target=read_output)
@@ -375,12 +381,12 @@ def read():
     os.system("touch " + file_path)
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Starting read procedure.\n"), arg2="tag2")
     disable_main_buttons()
-    label.configure(text="Status: BUSY")
+    updatelabel("Status: BUSY")
     left_frame.update_idletasks()
     if vBool.get()==True:
-        command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-r", str(file_path), "--verbose"]
+        command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-r", str(file_path), "--verbose"]
     elif vBool.get()==False:
-        command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "-r", str(file_path)]
+        command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "-r", str(file_path)]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     def read_output():
         while True:
@@ -411,18 +417,18 @@ def read():
         text.insert('1.0', hex_data)
         text.config(state="disabled")
         enable_main_buttons()
-        label.configure(text="Status: READY")
+        updatelabel("Status: READY")
     output_thread = threading.Thread(target=read_output)
     output_thread.start()
 
 def erase():
     disable_main_buttons()
-    label.configure(text="Status: BUSY")
+    updatelabel("Status: BUSY")
     terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Starting erase procedure.\n"), arg2="tag2")
     if vBool.get()==True:
-        command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "--erase", "--verbose"]
+        command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "--erase", "--verbose"]
     elif vBool.get()==False:
-        command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "--erase"]
+        command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "--erase"]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     def read_output():
         while True:
@@ -434,7 +440,7 @@ def erase():
             terminal_output.see(tk.END)
             terminal_output.configure(state="disabled")
         enable_main_buttons()
-        label.configure(text="Status: READY")
+        updatelabel("Status: READY")
         terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Erase complete.\n"), arg2="tag2")
         alert("Blow")
     output_thread = threading.Thread(target=read_output)
@@ -447,12 +453,12 @@ def verify():
         mbox.showwarning("Warning", "No file is opened that you can verify against.")
     else:
         disable_main_buttons()
-        label.configure(text="Status: BUSY")
+        updatelabel("Status: BUSY")
         terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Starting verify procedure.\n"), arg2="tag2")
         if vBool.get()==True:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "--verify", file_path, "--verbose"]
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "--verify", file_path, "--verbose"]
         elif vBool.get()==False:
-            command = ["/opt/local/bin/flashrom", "--programmer", "ch341a_spi", "--chip", selected_option, "--verify", file_path]
+            command = [flashrompath, "--programmer", "ch341a_spi", "--chip", selected_option, "--verify", file_path]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         def read_output():
             while True:
@@ -464,7 +470,7 @@ def verify():
                 terminal_output.see(tk.END)
                 terminal_output.configure(state="disabled")
             enable_main_buttons()
-            label.configure(text="Status: READY")
+            updatelabel("Status: READY")
             terminalappend(arg1=("\n  [QUICKFLASH v" + str(version) + "] Verify complete.\n"), arg2="tag2")
             alert("Blow")
         output_thread = threading.Thread(target=read_output)   
@@ -477,7 +483,7 @@ def install_flashrom():
     try:
         subprocess.check_output(['which', '/usr/local/bin/brew'])
         try:
-            subprocess.check_output(['which', '/opt/local/bin/flashrom'])
+            subprocess.check_output(['which', flashrompath])
             alert("Hero")
             mbox.showinfo("Info", "Homebrew and flashrom are already installed on your Mac.")
         except subprocess.CalledProcessError:
@@ -637,7 +643,9 @@ photo = ImageTk.PhotoImage(image)
 photo1 = ttk.Label(bottomleft_frame, image=photo, style='Transparent.TLabel')
 photo1.pack(padx=48)
 photo1.configure()
-label = tk.Label(bottomleft_frame, text="Status: READY", background="SystemTransparent")
+label_var = tk.StringVar()
+label_var.set("Status: READY")
+label = tk.Label(bottomleft_frame, textvariable=label_var, background="SystemTransparent")
 label.pack()
 global opt
 results_list=['']
@@ -684,6 +692,8 @@ bottomright_frame = tk.Frame(right_frame, background="SystemTransparent")
 bottomright_frame.pack(padx=0, pady=0, fill='x', expand=False, side=tk.BOTTOM, anchor='s')
 border = tk.Canvas(bottomright_frame, width=1, height=20, bg="#7F7F7F")
 border.pack(side=tk.LEFT)
+#global infolabel
+#infolabel = tk.Label(bottomright_frame, font=("TkDefaultFont", 12, "bold"), text="", background="SystemTransparent")
 global usblabel
 usblabel = tk.Label(bottomright_frame, font=("TkDefaultFont", 12, "bold"), text=" ", background="SystemTransparent")
 usblabel.pack(anchor='e', pady=(0,4), padx=4)
