@@ -33,11 +33,11 @@ Preparation
 -----------
 1. Open terminal and paste in `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`, to install [Homebrew](https://brew.sh/). Skip this step if you already have it.
 2. Install flashrom: enter `brew install flashrom` into terminal after Homebrew is installed.
-4. Install Python: enter `brew install python` into terminal after flashrom is installed.
-5. If you want to use the Standalone version, stop at this step and head straight to Usage. If not, continue on step 6.
-6. Install Pillow: enter `pip3 install Pillow` into terminal after Python is installed.
-7. Install PyQt5: enter `pip3 install PyQt5` into terminal after Pillow is installed.
-8. Install pyusb: enter `pip3 install pyusb` into terminal after PyQt5 is installed.
+3. Install Python: enter `brew install python` into terminal after flashrom is installed.
+4. If you want to use the Standalone version, stop at this step and head straight to Usage. If not, continue on step 5.
+5. Install Pillow: enter `pip3 install Pillow` into terminal after Python is installed.
+6. Install PyQt5: enter `pip3 install PyQt5` into terminal after Pillow is installed.
+7. Install pyusb: enter `pip3 install pyusb` into terminal after PyQt5 is installed.
 
 Building
 --------
