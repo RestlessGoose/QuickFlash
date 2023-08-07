@@ -29,6 +29,7 @@ Build dependencies
 * Python
     * PyUSB
     * py2app
+    * pyobjc
 * flashrom (along with its own dependencies)
 
 Building
