@@ -59,5 +59,5 @@ Usage
 
 Credits
 -------
-[Flashrom](https://www.flashrom.org/Flashrom) for [flashrom](https://github.com/flashrom/flashrom)
-[py2app](https://github.com/ronaldoussoren/py2app)
+* [Flashrom](https://www.flashrom.org/Flashrom) for [flashrom](https://github.com/flashrom/flashrom)
+* [py2app](https://github.com/ronaldoussoren/py2app)
