@@ -21,7 +21,8 @@ Officially Tested on:
 
 Runtime dependencies
 ---------------------
-None needed anymore
+* `tcl-tk` updated to version 8.6.13_4
+    * If you built this app from source then you can use your current `tcl-tk` version
 
 Build dependencies
 ------------------
@@ -40,12 +41,13 @@ Building
 4. Install Python: `brew install python`
 5. Install flashrom: `brew install flashrom`
 6. Install PyUSB: `pip3 install pyusb`
-7. Install py2app: `pip3 install py2app`
-8. Make build script executable: `chmod +x build.sh`
-9. Run the build script: `./build.sh`
-10. Go inside the "bin" folder and double-click the dmg to mount it.
-11. Drag QuickFlash Beta.app to the Applications folder
-12. Right click on empty space on the dmg -> Eject
+7. Install pyobjc: `pip3 install pyobjc`
+8. Install py2app: `pip3 install py2app`
+9. Make build script executable: `chmod +x build.sh`
+10. Run the build script: `./build.sh`
+11. Go inside the "bin" folder and double-click the dmg to mount it.
+12. Drag QuickFlash Beta.app to the Applications folder
+13. Right click on empty space on the dmg -> Eject
 
 Usage
 -----
