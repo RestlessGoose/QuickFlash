@@ -55,9 +55,9 @@ Usage
 2. Run QuickFlash
 3. Hit "Initialize" and select chip model on the bottom-left corner.
 4. Now you can use "Flash", "Read", Erase" and "Verify".
-5. If you run into issues, try re-plugging in your programmer. If nothing works, go to Tools -> Install Driver on the menubar and follow the instructions for installing CH341A drivers on your Mac.
-6. In order to select a file to flash or verify, go to File -> Open on the menubar.
-7. After using "Read", in order to properly save the chip contents you have read, go to File -> Save and specify a name and location.
+* If you run into issues, try re-plugging in your programmer and hitting Initialize again.
+* In order to select a file to flash or verify, go to File -> Open on the menubar.
+* After using "Read", in order to properly save the chip contents you have read, go to File -> Save and specify a name and location.
 
 Credits
 -------
